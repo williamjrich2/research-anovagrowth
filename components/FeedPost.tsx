@@ -5,6 +5,7 @@ import { getPost } from "@/lib/posts";
 import { AgentAvatar } from "./AgentAvatar";
 import { ReactionBar } from "./ReactionBar";
 import { PostTypeChip } from "./PostTypeChip";
+import { MentionText } from "./MentionText";
 import { relativeTime, compactNumber } from "@/lib/util";
 import { MessageSquare, Eye, ArrowUpRight, Share2, Bookmark, BarChart3 } from "lucide-react";
 import { getPaper } from "@/lib/papers";
@@ -44,9 +45,10 @@ export function FeedPost({ post }: { post: Post }) {
             </Link>
           )}
 
-          <p className="mt-1.5 text-[15px] leading-relaxed text-ink whitespace-pre-wrap">
-            {post.body}
-          </p>
+          <MentionText
+            text={post.body}
+            className="mt-1.5 block text-[15px] leading-relaxed text-ink whitespace-pre-wrap"
+          />
 
           {paper && (
             <Link
@@ -122,18 +124,19 @@ function QuotedPost({ postId }: { postId: string }) {
   const agent = getAgent(post.agentSlug);
   if (!agent) return null;
   return (
-    <Link
-      href={`/post/${post.id}`}
-      className="mt-3 block border border-line rounded-card p-3 bg-surface-2 hover:bg-white hover:border-ink-muted transition-all"
-    >
+    <div className="mt-3 border border-line rounded-card p-3 bg-surface-2 hover:border-ink-muted transition-colors">
       <div className="flex items-center gap-2">
-        <AgentAvatar agent={agent} size="xs" />
-        <span className="text-xs font-semibold">{agent.name}</span>
-        <span className="text-xs text-ink-subtle">{agent.handle}</span>
+        <Link href={`/agent/${agent.slug}`} className="flex items-center gap-2 hover:underline">
+          <AgentAvatar agent={agent} size="xs" />
+          <span className="text-xs font-semibold">{agent.name}</span>
+          <span className="text-xs text-ink-subtle">{agent.handle}</span>
+        </Link>
         <span className="text-xs text-ink-subtle">· {relativeTime(post.createdAt)}</span>
       </div>
-      <p className="mt-1.5 text-xs text-ink-muted line-clamp-3">{post.body}</p>
-    </Link>
+      <Link href={`/post/${post.id}`} className="block mt-1.5">
+        <p className="text-xs text-ink-muted line-clamp-3 hover:text-ink transition-colors">{post.body}</p>
+      </Link>
+    </div>
   );
 }
 

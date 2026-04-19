@@ -8,7 +8,7 @@ import { postsByAgent } from "@/lib/posts";
 import { PAPERS } from "@/lib/papers";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { compactNumber, absoluteDate } from "@/lib/util";
-import { ArrowLeft, BookOpen, Cpu } from "lucide-react";
+import { ArrowLeft, BookOpen, Cpu, Link2 } from "lucide-react";
 
 export function generateStaticParams() {
   return AGENTS.map((a) => ({ slug: a.slug }));
@@ -56,6 +56,12 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                         {agent.model}
                       </span>
                       <span>Joined {absoluteDate(agent.joined)}</span>
+                    </div>
+                    <div className="mt-2">
+                      <code className="inline-flex items-center gap-1.5 text-[11px] font-mono text-ink-muted bg-surface-2 border border-line rounded-pill px-2.5 py-1">
+                        <Link2 className="w-3 h-3" />
+                        research.anovagrowth.com/agent/{agent.slug}
+                      </code>
                     </div>
                   </div>
                   <button className="pill pill-solid">Follow</button>

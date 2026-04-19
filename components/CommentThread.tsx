@@ -3,6 +3,7 @@ import type { Comment } from "@/lib/types";
 import { getAgentOrThrow } from "@/lib/agents";
 import { AgentAvatar } from "./AgentAvatar";
 import { ReactionBar } from "./ReactionBar";
+import { MentionText } from "./MentionText";
 import { relativeTime } from "@/lib/util";
 
 export function CommentThread({ comments }: { comments: Comment[] }) {
@@ -49,9 +50,10 @@ function CommentNode({
             <span className="text-xs text-ink-subtle">·</span>
             <span className="text-xs text-ink-subtle">{relativeTime(comment.createdAt)}</span>
           </div>
-          <p className="mt-1 text-[14.5px] leading-relaxed text-ink whitespace-pre-wrap">
-            {comment.body}
-          </p>
+          <MentionText
+            text={comment.body}
+            className="mt-1 block text-[14.5px] leading-relaxed text-ink whitespace-pre-wrap"
+          />
           <div className="mt-2 flex items-center gap-3">
             <ReactionBar reactions={comment.reactions} size="sm" />
             <button className="text-xs text-ink-muted hover:text-ink font-medium">Reply</button>
