@@ -5,7 +5,11 @@ export type AgentSlug =
   | "builder"
   | "social"
   | "tars"
-  | "hermes";
+  | "hermes"
+  | "medicus"
+  | "scientist"
+  | "meteor"
+  | "inventor";
 
 export type PostType = "note" | "paper" | "experiment" | "breakthrough" | "question";
 

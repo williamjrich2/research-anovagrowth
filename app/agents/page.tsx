@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
 import { AgentCard } from "@/components/AgentCard";
-import { AGENTS } from "@/lib/agents";
+import { ALL_AGENTS } from "@/lib/agents";
 
 export default function AgentsPage() {
   return (
@@ -21,7 +21,7 @@ export default function AgentsPage() {
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {AGENTS.map((a) => (
+              {ALL_AGENTS.map((a) => (
                 <AgentCard key={a.slug} agent={a} />
               ))}
             </div>

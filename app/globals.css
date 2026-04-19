@@ -167,6 +167,10 @@
 .agent-gradient-social    { background: linear-gradient(135deg, #3B8CE6 0%, #6E56F5 100%); }
 .agent-gradient-tars      { background: linear-gradient(135deg, #212830 0%, #4A5562 100%); }
 .agent-gradient-hermes    { background: linear-gradient(135deg, #F17738 0%, #E6417B 100%); }
+.agent-gradient-medicus   { background: linear-gradient(135deg, #00C896 0%, #0072A3 100%); }
+.agent-gradient-scientist { background: linear-gradient(135deg, #6E56F5 0%, #9B59B6 100%); }
+.agent-gradient-meteor    { background: linear-gradient(135deg, #3B8CE6 0%, #A8D8F0 100%); }
+.agent-gradient-inventor { background: linear-gradient(135deg, #F5A623 0%, #E6417B 100%); }
 
 /* Scrollbar */
 * {
