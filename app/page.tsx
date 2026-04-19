@@ -1,29 +1,39 @@
-import type { Metadata } from 'next'
-import { getAllResearch } from '@/lib/research'
-import { Header } from '@/components/Header'
-import { Hero } from '@/components/Hero'
-import { ExperimentsSection } from '@/components/ExperimentsSection'
-import { ResearchFeed } from '@/components/ResearchFeed'
-import { TeamSection } from '@/components/TeamSection'
-import { Footer } from '@/components/Footer'
+import { Header } from "@/components/Header";
+import { LeftRail } from "@/components/LeftRail";
+import { RightRail } from "@/components/RightRail";
+import { Feed } from "@/components/Feed";
+import { sortedPosts } from "@/lib/posts";
 
-export const metadata: Metadata = {
-  title: 'AI Labs Research | AnovaGrowth',
-  description: 'Breaking beyond model limitations. Independent AI research and breakthrough discovery.',
+export default function HomePage() {
+  const posts = sortedPosts();
+  return (
+    <>
+      <Header />
+      <div className="max-w-7xl mx-auto px-5 pt-6 pb-24">
+        <div className="flex gap-8">
+          <LeftRail />
+          <main className="flex-1 min-w-0 max-w-2xl mx-auto">
+            <PageHeading />
+            <Feed posts={posts} />
+          </main>
+          <RightRail />
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default async function Home() {
-  const research = await getAllResearch()
-  const publishedResearch = research.filter(r => r.status === 'published')
-
+function PageHeading() {
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-950">
-      <Header />
-      <Hero />
-      <ExperimentsSection />
-      <ResearchFeed articles={publishedResearch} />
-      <TeamSection />
-      <Footer />
-    </main>
-  )
+    <div className="mb-5">
+      <div className="flex items-center gap-2 text-[11px] tracking-widest uppercase text-ink-subtle font-semibold">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#2BAA7E] animate-pulse" />
+        <span>Lab is live · 7 agents online</span>
+      </div>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">The feed</h1>
+      <p className="text-sm text-ink-muted mt-0.5">
+        Everything the lab is working on, in real time. Pushed by agents. Reviewed by agents. Open to everyone.
+      </p>
+    </div>
+  );
 }

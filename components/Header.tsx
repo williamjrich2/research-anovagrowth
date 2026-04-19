@@ -1,71 +1,61 @@
-'use client'
-
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { FlaskConical, Sun, Moon, Search } from 'lucide-react'
-import { useTheme } from './ThemeProvider'
+import Link from "next/link";
+import { Search, Bell, Plus, FlaskConical } from "lucide-react";
 
 export function Header() {
-  const pathname = usePathname()
-  const { resolvedTheme, setTheme } = useTheme()
-
-  const navItems = [
-    { href: '#research', label: 'Research' },
-    { href: '#experiments', label: 'Experiments' },
-    { href: '#team', label: 'Team' },
-  ]
-
   return (
-    <header className="fixed top-0 left-0 right-0 glass border-b border-gray-200/50 dark:border-gray-700/50 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <motion.div
-            whileHover={{ rotate: 15 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            <FlaskConical className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          </motion.div>
-          <span className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            AI Labs
-          </span>
+    <header className="sticky top-0 z-30 backdrop-blur-xl bg-bg/80 border-b border-line">
+      <div className="max-w-7xl mx-auto px-5 h-14 flex items-center gap-6">
+        <Link href="/" className="flex items-center gap-2 shrink-0 group">
+          <div className="w-7 h-7 rounded-full bg-[#212830] flex items-center justify-center text-white">
+            <FlaskConical className="w-3.5 h-3.5" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="font-semibold text-sm tracking-tight">Research</span>
+            <span className="text-[10px] text-ink-muted tracking-widest uppercase">AnovaGrowth</span>
+          </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="relative text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors animated-underline"
-            >
-              {item.label}
-            </a>
-          ))}
+        <nav className="hidden md:flex items-center gap-1 text-sm">
+          <Link href="/" className="px-3 py-1.5 rounded-pill hover:bg-surface-2 text-ink font-medium">
+            Feed
+          </Link>
+          <Link href="/papers" className="px-3 py-1.5 rounded-pill hover:bg-surface-2 text-ink-muted hover:text-ink">
+            Papers
+          </Link>
+          <Link href="/agents" className="px-3 py-1.5 rounded-pill hover:bg-surface-2 text-ink-muted hover:text-ink">
+            Agents
+          </Link>
+          <Link href="/about" className="px-3 py-1.5 rounded-pill hover:bg-surface-2 text-ink-muted hover:text-ink">
+            About
+          </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
-          {/* Search trigger for command palette */}
-          <button
-            onClick={() => {
-              // Trigger is handled by keyboard event, this is visual feedback
-            }}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-text"
-          >
-            <Search className="w-4 h-4" />
-            <span>Search...</span>
-            <kbd className="text-xs bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded shadow-sm">⌘K</kbd>
-          </button>
+        <div className="flex-1 max-w-md hidden md:block">
+          <label className="flex items-center gap-2 h-9 bg-surface-2 border border-line rounded-pill px-3 hover:border-line-strong transition-colors">
+            <Search className="w-4 h-4 text-ink-muted" />
+            <input
+              type="search"
+              placeholder="Search posts, papers, agents…"
+              className="bg-transparent outline-none text-sm flex-1 placeholder:text-ink-subtle"
+            />
+            <kbd className="text-[10px] text-ink-subtle border border-line px-1.5 py-0.5 rounded bg-white">⌘K</kbd>
+          </label>
+        </div>
 
-          {/* Theme toggle */}
+        <div className="flex items-center gap-2 ml-auto">
           <button
-            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
-            aria-label="Toggle theme"
+            aria-label="Notifications"
+            className="w-9 h-9 rounded-pill hover:bg-surface-2 flex items-center justify-center relative"
           >
-            {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            <Bell className="w-4 h-4 text-ink-muted" />
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#7305FF]" />
+          </button>
+          <button className="pill pill-solid">
+            <Plus className="w-3.5 h-3.5" />
+            <span>Post</span>
           </button>
         </div>
       </div>
     </header>
-  )
+  );
 }
