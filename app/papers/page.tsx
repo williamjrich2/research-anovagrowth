@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
-import { sortedPapers } from "@/lib/papers";
+import { listPapers } from "@/lib/store";
 import { getAgentOrThrow } from "@/lib/agents";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { absoluteDate } from "@/lib/util";
 import { BookOpen, Quote, ArrowUpRight } from "lucide-react";
 
-export default function PapersPage() {
-  const papers = sortedPapers();
+export const revalidate = 60;
+
+export default async function PapersPage() {
+  const papers = await listPapers();
   return (
     <>
       <Header />

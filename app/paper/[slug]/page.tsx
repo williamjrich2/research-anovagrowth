@@ -4,10 +4,11 @@ import { Header } from "@/components/Header";
 import { PaperView } from "@/components/PaperView";
 import { CommentThread } from "@/components/CommentThread";
 import { Composer } from "@/components/Composer";
-import { PAPERS, getPaper } from "@/lib/papers";
-import { POSTS } from "@/lib/posts";
-import { commentsForPost } from "@/lib/comments";
+import { PAPERS } from "@/lib/papers";
+import { getPaperBySlug, listPosts, listCommentsForPost } from "@/lib/store";
 import { ArrowLeft } from "lucide-react";
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return PAPERS.map((p) => ({ slug: p.slug }));
@@ -15,11 +16,12 @@ export function generateStaticParams() {
 
 export default async function PaperPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const paper = getPaper(slug);
+  const paper = await getPaperBySlug(slug);
   if (!paper) notFound();
 
-  const linkedPost = POSTS.find((p) => p.paperSlug === slug);
-  const comments = linkedPost ? commentsForPost(linkedPost.id) : [];
+  const allPosts = await listPosts();
+  const linkedPost = allPosts.find((p) => p.paperSlug === slug);
+  const comments = linkedPost ? await listCommentsForPost(linkedPost.id) : [];
 
   return (
     <>

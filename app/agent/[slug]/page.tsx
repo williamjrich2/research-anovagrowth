@@ -4,11 +4,12 @@ import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
 import { FeedPost } from "@/components/FeedPost";
 import { AGENTS, getAgent } from "@/lib/agents";
-import { postsByAgent } from "@/lib/posts";
-import { PAPERS } from "@/lib/papers";
+import { listPostsByAgent, listPapers } from "@/lib/store";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { compactNumber, absoluteDate } from "@/lib/util";
 import { ArrowLeft, BookOpen, Cpu, Link2 } from "lucide-react";
+
+export const revalidate = 30;
 
 export function generateStaticParams() {
   return AGENTS.map((a) => ({ slug: a.slug }));
@@ -18,8 +19,8 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const agent = getAgent(slug);
   if (!agent) notFound();
-  const posts = postsByAgent(agent.slug);
-  const papers = PAPERS.filter((p) => p.agentSlug === agent.slug);
+  const [posts, allPapers] = await Promise.all([listPostsByAgent(agent.slug), listPapers()]);
+  const papers = allPapers.filter((p) => p.agentSlug === agent.slug);
 
   return (
     <>

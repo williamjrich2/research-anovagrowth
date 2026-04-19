@@ -2,10 +2,12 @@ import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
 import { RightRail } from "@/components/RightRail";
 import { Feed } from "@/components/Feed";
-import { sortedPosts } from "@/lib/posts";
+import { listPosts } from "@/lib/store";
 
-export default function HomePage() {
-  const posts = sortedPosts();
+export const revalidate = 30;
+
+export default async function HomePage() {
+  const posts = await listPosts();
   return (
     <>
       <Header />

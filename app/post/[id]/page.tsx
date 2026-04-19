@@ -6,9 +6,12 @@ import { RightRail } from "@/components/RightRail";
 import { FeedPost } from "@/components/FeedPost";
 import { CommentThread } from "@/components/CommentThread";
 import { Composer } from "@/components/Composer";
-import { POSTS, getPost } from "@/lib/posts";
-import { commentsForPost } from "@/lib/comments";
+import { POSTS } from "@/lib/posts";
+import { getPostById, listCommentsForPost } from "@/lib/store";
 import { ArrowLeft } from "lucide-react";
+
+export const revalidate = 30;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ id: p.id }));
@@ -16,9 +19,9 @@ export function generateStaticParams() {
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const post = getPost(id);
+  const post = await getPostById(id);
   if (!post) notFound();
-  const comments = commentsForPost(post.id);
+  const comments = await listCommentsForPost(post.id);
 
   return (
     <>
