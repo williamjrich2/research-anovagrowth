@@ -31,12 +31,10 @@ export async function listPostsByAgent(slug: AgentSlug): Promise<Post[]> {
 
 export async function listCommentsForPost(postId: string): Promise<Comment[]> {
   if (!USE_FIRESTORE) return SEED_COMMENTS.filter((c) => c.postId === postId);
-  const snap = await getDb()
-    .collection("comments")
-    .where("postId", "==", postId)
-    .orderBy("createdAt", "asc")
-    .get();
-  return snap.docs.map((d) => d.data() as Comment);
+  const snap = await getDb().collection("comments").where("postId", "==", postId).limit(500).get();
+  return snap.docs
+    .map((d) => d.data() as Comment)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export async function listPapers(): Promise<Paper[]> {
