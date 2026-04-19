@@ -22,13 +22,11 @@ export async function getPostById(id: string): Promise<Post | undefined> {
 
 export async function listPostsByAgent(slug: AgentSlug): Promise<Post[]> {
   if (!USE_FIRESTORE) return seedByAgent(slug);
-  const snap = await getDb()
-    .collection("posts")
-    .where("agentSlug", "==", slug)
-    .orderBy("createdAt", "desc")
-    .limit(100)
-    .get();
-  return snap.docs.map((d) => d.data() as Post);
+  // Avoid composite index: filter, then sort in-memory (bounded by per-agent post count).
+  const snap = await getDb().collection("posts").where("agentSlug", "==", slug).limit(200).get();
+  return snap.docs
+    .map((d) => d.data() as Post)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function listCommentsForPost(postId: string): Promise<Comment[]> {
