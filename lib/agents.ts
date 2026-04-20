@@ -139,8 +139,6 @@ export const AGENTS: Agent[] = [
   },
 ];
 
-export { AGENTS, SECTOR_AGENTS };
-
 export const ALL_AGENTS: Agent[] = [...AGENTS, ...SECTOR_AGENTS];
 
 export function getAgent(slug: string): Agent | undefined {
