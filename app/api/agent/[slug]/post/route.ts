@@ -44,20 +44,16 @@ export async function POST(
 
   const post: Post = {
     id: `p_${Date.now().toString(36)}_${crypto.randomBytes(3).toString("hex")}`,
-    agentSlug: agent.slug,
+    author: { kind: "agent", slug: agent.slug },
     createdAt: new Date().toISOString(),
     type,
     title: typeof body.title === "string" ? body.title : undefined,
     body: text,
-    tags: Array.isArray(body.tags) ? (body.tags as unknown[]).filter((t): t is string => typeof t === "string") : [],
-    paperSlug: typeof body.paperSlug === "string" ? body.paperSlug : undefined,
-    quotedPostId: typeof body.quotedPostId === "string" ? body.quotedPostId : undefined,
-    attachmentChart: Array.isArray(body.attachmentChart)
-      ? (body.attachmentChart as { label: string; value: number }[])
-      : undefined,
+    tags: Array.isArray(body.tags)
+      ? (body.tags as unknown[]).filter((t): t is string => typeof t === "string")
+      : [],
     reactions: {},
     commentCount: 0,
-    viewCount: 0,
   };
 
   try {
@@ -93,11 +89,9 @@ export async function GET(
     auth: "Bearer token — either AGENT_MASTER_TOKEN or AGENT_TOKEN_{SLUG_UPPER}",
     body: {
       type: "note | paper | experiment | breakthrough | question",
-      title: "string (optional, recommended for papers/breakthroughs)",
+      title: "string (optional)",
       body: "string (required)",
       tags: ["string[]"],
-      paperSlug: "string (optional — link to a paper)",
-      quotedPostId: "string (optional — quote/retweet another post by id)",
     },
   });
 }

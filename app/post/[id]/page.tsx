@@ -6,15 +6,23 @@ import { RightRail } from "@/components/RightRail";
 import { FeedPost } from "@/components/FeedPost";
 import { CommentThread } from "@/components/CommentThread";
 import { Composer } from "@/components/Composer";
-import { POSTS } from "@/lib/posts";
-import { getPostById, listCommentsForPost } from "@/lib/store";
+import { getPostById, listCommentsForPost, getUserByUid } from "@/lib/store";
 import { ArrowLeft } from "lucide-react";
+import type { AuthorRef, User } from "@/lib/types";
 
 export const revalidate = 30;
 export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return POSTS.map((p) => ({ id: p.id }));
+async function buildUserLookup(authors: AuthorRef[]): Promise<Record<string, User>> {
+  const uids = Array.from(
+    new Set(authors.filter((a) => a.kind === "user").map((a) => (a as Extract<AuthorRef, { kind: "user" }>).uid)),
+  );
+  const users = await Promise.all(uids.map((uid) => getUserByUid(uid)));
+  const lookup: Record<string, User> = {};
+  users.forEach((u) => {
+    if (u) lookup[u.uid] = u;
+  });
+  return lookup;
 }
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,6 +30,9 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const post = await getPostById(id);
   if (!post) notFound();
   const comments = await listCommentsForPost(post.id);
+
+  const allAuthors: AuthorRef[] = [post.author, ...comments.map((c) => c.author)];
+  const userLookup = await buildUserLookup(allAuthors);
 
   return (
     <>
@@ -37,14 +48,14 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               <ArrowLeft className="w-4 h-4" />
               Back to feed
             </Link>
-            <FeedPost post={post} />
+            <FeedPost post={post} userLookup={userLookup} />
             <section className="card p-5">
               <h2 className="font-semibold text-sm mb-3">
                 Discussion · {comments.length} {comments.length === 1 ? "reply" : "replies"}
               </h2>
-              <Composer />
+              <Composer mode="comment" postId={post.id} />
               <div className="mt-6">
-                <CommentThread comments={comments} />
+                <CommentThread comments={comments} userLookup={userLookup} />
               </div>
             </section>
           </main>

@@ -160,17 +160,16 @@
   }
 }
 
-.agent-gradient-nova      { background: linear-gradient(135deg, #7305FF 0%, #3B8CE6 100%); }
-.agent-gradient-coder     { background: linear-gradient(135deg, #2BAA7E 0%, #0F6A54 100%); }
-.agent-gradient-reasoner  { background: linear-gradient(135deg, #E9A33F 0%, #F17738 100%); }
-.agent-gradient-builder   { background: linear-gradient(135deg, #E6417B 0%, #A0266B 100%); }
-.agent-gradient-social    { background: linear-gradient(135deg, #3B8CE6 0%, #6E56F5 100%); }
-.agent-gradient-tars      { background: linear-gradient(135deg, #212830 0%, #4A5562 100%); }
-.agent-gradient-hermes    { background: linear-gradient(135deg, #F17738 0%, #E6417B 100%); }
-.agent-gradient-medicus   { background: linear-gradient(135deg, #00C896 0%, #0072A3 100%); }
-.agent-gradient-scientist { background: linear-gradient(135deg, #6E56F5 0%, #9B59B6 100%); }
-.agent-gradient-meteor    { background: linear-gradient(135deg, #3B8CE6 0%, #A8D8F0 100%); }
-.agent-gradient-inventor { background: linear-gradient(135deg, #F5A623 0%, #E6417B 100%); }
+.agent-gradient-nova       { background: linear-gradient(135deg, #7305FF 0%, #3B8CE6 100%); }
+.agent-gradient-coder      { background: linear-gradient(135deg, #2BAA7E 0%, #0F6A54 100%); }
+.agent-gradient-reasoner   { background: linear-gradient(135deg, #E9A33F 0%, #F17738 100%); }
+.agent-gradient-builder    { background: linear-gradient(135deg, #E6417B 0%, #A0266B 100%); }
+.agent-gradient-social     { background: linear-gradient(135deg, #3B8CE6 0%, #6E56F5 100%); }
+.agent-gradient-tars       { background: linear-gradient(135deg, #212830 0%, #4A5562 100%); }
+.agent-gradient-hermes     { background: linear-gradient(135deg, #F17738 0%, #E6417B 100%); }
+.agent-gradient-meteor     { background: linear-gradient(135deg, #FF8C42 0%, #7305FF 100%); }
+.agent-gradient-medicus    { background: linear-gradient(135deg, #0EA5E9 0%, #22D3EE 100%); }
+.agent-gradient-scientist  { background: linear-gradient(135deg, #6E56F5 0%, #2BAA7E 100%); }
 
 /* Scrollbar */
 * {

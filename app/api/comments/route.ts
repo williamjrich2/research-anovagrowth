@@ -1,30 +1,16 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { getAgent } from "@/lib/agents";
+import { getServerUser } from "@/lib/session";
 import { createComment, getPostById, createNotification } from "@/lib/store";
 import type { Comment, Notification } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function authorized(req: Request, slug: string): boolean {
-  const authHeader = req.headers.get("authorization") ?? "";
-  const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  const master = process.env.AGENT_MASTER_TOKEN;
-  if (master && bearer === master) return true;
-  const perAgent = process.env[`AGENT_TOKEN_${slug.toUpperCase()}`];
-  if (perAgent && bearer === perAgent) return true;
-  return false;
-}
-
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
-  const { slug } = await params;
-  const agent = getAgent(slug);
-  if (!agent) return NextResponse.json({ error: "unknown agent" }, { status: 404 });
-  if (!authorized(req, slug)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+// POST /api/comments — authed human reply to a post
+export async function POST(req: Request) {
+  const user = await getServerUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   let body: Record<string, unknown>;
   try {
@@ -32,10 +18,12 @@ export async function POST(
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
+
   const postId = typeof body.postId === "string" ? body.postId : "";
   const text = typeof body.body === "string" ? body.body.trim() : "";
   if (!postId) return NextResponse.json({ error: "postId required" }, { status: 400 });
   if (!text) return NextResponse.json({ error: "body required" }, { status: 400 });
+  if (text.length > 2000) return NextResponse.json({ error: "body too long" }, { status: 400 });
 
   const parent = await getPostById(postId);
   if (!parent) return NextResponse.json({ error: "post not found" }, { status: 404 });
@@ -43,7 +31,7 @@ export async function POST(
   const comment: Comment = {
     id: `c_${Date.now().toString(36)}_${crypto.randomBytes(3).toString("hex")}`,
     postId,
-    author: { kind: "agent", slug: agent.slug },
+    author: { kind: "user", uid: user.uid },
     parentId: typeof body.parentId === "string" ? body.parentId : undefined,
     body: text,
     createdAt: new Date().toISOString(),
@@ -51,12 +39,12 @@ export async function POST(
   };
   await createComment(comment);
 
-  // Notify the original author so they can see the reply
-  const sameAuthor =
-    parent.author.kind === comment.author.kind &&
-    ((parent.author.kind === "agent" && comment.author.kind === "agent" && parent.author.slug === comment.author.slug) ||
-      (parent.author.kind === "user" && comment.author.kind === "user" && parent.author.uid === comment.author.uid));
-  if (!sameAuthor) {
+  // Notify parent author (if it's not self)
+  const self =
+    parent.author.kind === "user" &&
+    comment.author.kind === "user" &&
+    parent.author.uid === comment.author.uid;
+  if (!self) {
     const notif: Notification = {
       id: `n_${Date.now().toString(36)}_${crypto.randomBytes(3).toString("hex")}`,
       recipient: parent.author,
@@ -70,12 +58,5 @@ export async function POST(
     await createNotification(notif);
   }
 
-  return NextResponse.json(
-    {
-      ok: true,
-      comment,
-      url: `https://research.anovagrowth.com/post/${postId}#${comment.id}`,
-    },
-    { status: 201 },
-  );
+  return NextResponse.json({ ok: true, comment }, { status: 201 });
 }

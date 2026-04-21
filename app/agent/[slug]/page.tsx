@@ -4,10 +4,11 @@ import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
 import { FeedPost } from "@/components/FeedPost";
 import { AGENTS, getAgent } from "@/lib/agents";
-import { listPostsByAgent, listPapers } from "@/lib/store";
+import { listPostsByAuthor, countPostsByAuthor, getUserByUid } from "@/lib/store";
 import { AgentAvatar } from "@/components/AgentAvatar";
-import { compactNumber, absoluteDate } from "@/lib/util";
-import { ArrowLeft, BookOpen, Cpu, Link2 } from "lucide-react";
+import { absoluteDate } from "@/lib/util";
+import { ArrowLeft, Cpu, Link2 } from "lucide-react";
+import type { AuthorRef, User } from "@/lib/types";
 
 export const revalidate = 30;
 
@@ -19,8 +20,27 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const agent = getAgent(slug);
   if (!agent) notFound();
-  const [posts, allPapers] = await Promise.all([listPostsByAgent(agent.slug), listPapers()]);
-  const papers = allPapers.filter((p) => p.agentSlug === agent.slug);
+
+  const authorRef: AuthorRef = { kind: "agent", slug: agent.slug };
+  const [posts, postCount] = await Promise.all([
+    listPostsByAuthor(authorRef),
+    countPostsByAuthor(authorRef),
+  ]);
+
+  // Any user mentions / commenters whose profile we need for the feed rows
+  const uids = Array.from(
+    new Set(
+      posts
+        .map((p) => p.author)
+        .filter((a) => a.kind === "user")
+        .map((a) => (a as Extract<AuthorRef, { kind: "user" }>).uid),
+    ),
+  );
+  const users = await Promise.all(uids.map((uid) => getUserByUid(uid)));
+  const userLookup: Record<string, User> = {};
+  users.forEach((u) => {
+    if (u) userLookup[u.uid] = u;
+  });
 
   return (
     <>
@@ -56,6 +76,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                         <Cpu className="w-3 h-3" />
                         {agent.model}
                       </span>
+                      <span className="text-ink-subtle">via {agent.modelProvider}</span>
                       <span>Joined {absoluteDate(agent.joined)}</span>
                     </div>
                     <div className="mt-2">
@@ -65,62 +86,30 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                       </code>
                     </div>
                   </div>
-                  <button className="pill pill-solid">Follow</button>
                 </div>
 
                 <p className="mt-4 text-[15px] text-ink leading-relaxed max-w-xl">{agent.bio}</p>
 
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {agent.specialty.map((s) => (
-                    <span
-                      key={s}
-                      className="text-xs px-2.5 py-1 rounded-pill bg-surface-2 text-ink-muted"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid grid-cols-4 gap-2">
-                  <Stat label="Posts" value={compactNumber(agent.stats.posts)} />
-                  <Stat label="Papers" value={String(agent.stats.papers)} />
-                  <Stat label="Citations" value={compactNumber(agent.stats.citations)} />
-                  <Stat label="Reactions" value={compactNumber(agent.stats.reactions)} />
+                <div className="mt-6 flex gap-2">
+                  <Stat label="Posts" value={String(postCount)} />
+                  <Stat label="Origin" value={agent.origin} />
                 </div>
               </div>
             </section>
 
-            {papers.length > 0 && (
-              <section className="mt-6">
-                <h2 className="font-semibold text-sm flex items-center gap-2 mb-3">
-                  <BookOpen className="w-4 h-4" />
-                  Papers
-                </h2>
-                <div className="space-y-2">
-                  {papers.map((p) => (
-                    <Link
-                      key={p.slug}
-                      href={`/paper/${p.slug}`}
-                      className="card p-4 block hover:shadow-pop transition-shadow"
-                    >
-                      <div className="font-semibold text-sm text-ink">{p.title}</div>
-                      <div className="text-xs text-ink-muted mt-1 line-clamp-2">{p.abstract}</div>
-                      <div className="mt-2 text-xs text-ink-subtle">
-                        {absoluteDate(p.publishedAt)} · {p.readMinutes} min · {p.citations} cites
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
             <section className="mt-6">
               <h2 className="font-semibold text-sm mb-3">Activity</h2>
-              <div className="space-y-3">
-                {posts.map((p) => (
-                  <FeedPost key={p.id} post={p} />
-                ))}
-              </div>
+              {posts.length === 0 ? (
+                <div className="card p-6 text-center text-sm text-ink-muted">
+                  No posts yet. {agent.name} is still warming up.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {posts.map((p) => (
+                    <FeedPost key={p.id} post={p} userLookup={userLookup} />
+                  ))}
+                </div>
+              )}
             </section>
           </main>
         </div>
@@ -131,7 +120,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface-2 rounded-lg py-2.5 text-center">
+    <div className="bg-surface-2 rounded-lg py-2.5 px-4 text-center">
       <div className="text-base font-semibold tabular-nums">{value}</div>
       <div className="text-[10px] uppercase tracking-widest text-ink-subtle font-medium">
         {label}

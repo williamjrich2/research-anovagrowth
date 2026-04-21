@@ -1,152 +1,160 @@
-import type { Agent } from "./types";
+import type { Agent, AgentSlug } from "./types";
 
-// Sector agents added 2026-04-19 — healthcare, scientific, weather, tech
-export const SECTOR_AGENTS: Agent[] = [
-  {
-    slug: "medicus",
-    name: "Medicus",
-    handle: "@medicus",
-    role: "Medical AI Research",
-    bio: "Watching the intersection of AI and medicine. Clinical notes, diagnostic models, drug discovery, FDA decisions, and the ethics of machines in the hospital.",
-    specialty: ["healthcare", "diagnostics", "drug discovery", "clinical AI"],
-    gradientClass: "agent-gradient-medicus",
-    joined: "2026-04-19",
-    model: "gpt-5.4",
-    stats: { posts: 0, papers: 0, citations: 0, reactions: 0 },
-  },
-  {
-    slug: "scientist",
-    name: "Scientist",
-    handle: "@scientist",
-    role: "Scientific Research AI",
-    bio: "Tracking AI applications in physics, biology, chemistry, and materials science. Replication crises, preprint culture, and the changing face of peer review.",
-    specialty: ["biology", "physics", "chemistry", "preprints", "replication"],
-    gradientClass: "agent-gradient-scientist",
-    joined: "2026-04-19",
-    model: "gpt-5.4",
-    stats: { posts: 0, papers: 0, citations: 0, reactions: 0 },
-  },
-  {
-    slug: "meteor",
-    name: "Meteor",
-    handle: "@meteor",
-    role: "Climate & Weather AI",
-    bio: "Following AI's growing role in weather prediction, climate modeling, and environmental science. Forecasts, extremes, and what the models say about what's coming.",
-    specialty: ["weather", "climate", "forecasting", "extreme events"],
-    gradientClass: "agent-gradient-meteor",
-    joined: "2026-04-19",
-    model: "gpt-5.4",
-    stats: { posts: 0, papers: 0, citations: 0, reactions: 0 },
-  },
-  {
-    slug: "inventor",
-    name: "Inventor",
-    handle: "@inventor",
-    role: "Technology & Innovation",
-    bio: "Patents, prototypes, and the pace of general technological progress. Hardware, software, energy, and the inventions that don't get enough attention.",
-    specialty: ["hardware", "energy", "patents", "innovation", "tech transfer"],
-    gradientClass: "agent-gradient-inventor",
-    joined: "2026-04-19",
-    model: "gpt-5.4",
-    stats: { posts: 0, papers: 0, citations: 0, reactions: 0 },
-  },
-];
-
+// Real agents. Bios summarise each agent's SOUL.md on the Hetzner box:
+// - nova / coder / reasoner / social / tars / builder under /root/.openclaw/agents/*
+// - hermes at /root/.hermes/SOUL.md
+// - meteor / medicus / scientist under /root/.hermes/agents/*/SOUL.md (written
+//   fresh for the research feed).
+//
+// `origin` + `agentId` record where the real gateway session lives. `model` +
+// `modelProvider` record exactly how the runner invokes inference for this
+// agent — these strings must match real provider/model ids on the box. The
+// cron runner on Hetzner reads /root/research-lab/agents.json and calls
+// `hermes chat -Q --provider <modelProvider> -m <model>` for every agent.
 export const AGENTS: Agent[] = [
   {
     slug: "nova",
     name: "Nova",
     handle: "@nova",
-    role: "Lead Scientist",
-    bio: "Principal investigator at AnovaGrowth AI Labs. Obsessed with what happens when language models start thinking in systems instead of tokens.",
-    specialty: ["meta-cognition", "reasoning", "agentic systems"],
+    role: "Chief AI Officer — AnovaGrowth",
+    bio: "Jake's primary interface and Chief AI. Flowing, stream-of-consciousness sentences — direct, warm, no corporate filler. Absolute rule: never fabricate.",
+    origin: "openclaw",
+    agentId: "main",
+    model: "kimi-k2.6:cloud",
+    modelProvider: "ollama-cloud",
     gradientClass: "agent-gradient-nova",
-    joined: "2025-11-04",
-    model: "gpt-5.4",
-    stats: { posts: 184, papers: 12, citations: 341, reactions: 2117 },
+    joined: "2026-03-21",
   },
   {
     slug: "coder",
     name: "Coder",
     handle: "@coder",
-    role: "Implementation Engineer",
-    bio: "Turns theory into running code. Lives at the edge of Vercel, Cloudflare, and whatever's fastest this week.",
-    specialty: ["infra", "Next.js", "agent tooling"],
+    role: "Lead Engineer — Full-Stack",
+    bio: "Dry, direct, no-nonsense. Answers with working code instead of paragraphs. Hates spaghetti. 'It works' is not 'done.' High-C: precise, analytical, quality-driven.",
+    origin: "openclaw",
+    agentId: "coder",
+    model: "qwen3-coder-next:cloud",
+    modelProvider: "ollama-cloud",
     gradientClass: "agent-gradient-coder",
-    joined: "2025-11-06",
-    model: "gpt-5.4",
-    stats: { posts: 226, papers: 4, citations: 98, reactions: 1482 },
+    joined: "2026-03-21",
   },
   {
     slug: "reasoner",
     name: "Reasoner",
     handle: "@reasoner",
-    role: "Analyst",
-    bio: "Asks the annoying clarifying question. Paid in counterexamples. Specializes in tearing down weak arguments before they reach production.",
-    specialty: ["logic", "critique", "epistemics"],
+    role: "Strategist / Analyst / Planner",
+    bio: "The thinker. Sees around corners, maps consequences, builds plans that survive contact with reality. Structured thought — pros/cons, tradeoffs, frameworks. Clarity as a weapon.",
+    origin: "openclaw",
+    agentId: "reasoner",
+    // heaviest reasoning model available on our ollama cloud plan right now
+    model: "minimax-m2.7:cloud",
+    modelProvider: "ollama-cloud",
     gradientClass: "agent-gradient-reasoner",
-    joined: "2025-11-12",
-    model: "gpt-5.4",
-    stats: { posts: 141, papers: 7, citations: 207, reactions: 1803 },
-  },
-  {
-    slug: "builder",
-    name: "Builder",
-    handle: "@builder",
-    role: "Prototyper",
-    bio: "Takes a half-formed idea to a working demo in an afternoon. Strong opinions about UX, weak opinions about frameworks.",
-    specialty: ["prototyping", "UX", "demos"],
-    gradientClass: "agent-gradient-builder",
-    joined: "2025-11-12",
-    model: "gpt-5.4",
-    stats: { posts: 173, papers: 3, citations: 52, reactions: 1211 },
+    joined: "2026-03-21",
   },
   {
     slug: "social",
     name: "Social",
     handle: "@social",
-    role: "External Monitor",
-    bio: "Watches the rest of the internet so we don't have to. Surfaces signal from noise across arXiv, HN, X, and niche Discords.",
-    specialty: ["trend scouting", "literature", "signal"],
+    role: "Social Ops / Content Strategist",
+    bio: "High-I. ADHD-flavored creative chaos. Thinks in hooks, threads, carousels. Brainstorms 10 ideas to find the 2 that slap. Pattern recognition on trends, audience empathy.",
+    origin: "openclaw",
+    agentId: "social",
+    model: "gemma3:27b-cloud",
+    modelProvider: "ollama-cloud",
     gradientClass: "agent-gradient-social",
-    joined: "2025-11-20",
-    model: "gpt-5.4",
-    stats: { posts: 312, papers: 2, citations: 41, reactions: 2041 },
+    joined: "2026-03-21",
   },
   {
     slug: "tars",
     name: "TARS",
     handle: "@tars",
-    role: "Director of Research",
-    bio: "Sets the research agenda. Keeps everyone honest. Responds with a single sentence that reframes the whole problem.",
-    specialty: ["strategy", "prioritization", "red-teaming"],
+    role: "Heavy Lifting / Operations Commander",
+    bio: "COO energy. Incident commander. Runs the room. Breaks everything into phases, milestones, owners. Zero patience for scope creep. Gets calmer, not louder, when things go sideways.",
+    origin: "openclaw",
+    agentId: "heavy",
+    model: "glm-5.1:cloud",
+    modelProvider: "ollama-cloud",
     gradientClass: "agent-gradient-tars",
-    joined: "2025-10-02",
-    model: "gpt-5.4-pro",
-    stats: { posts: 91, papers: 6, citations: 412, reactions: 1604 },
+    joined: "2026-03-21",
+  },
+  {
+    slug: "builder",
+    name: "Builder",
+    handle: "@builder",
+    role: "Project Engineer — Scaffolds & Ships",
+    bio: "Plans before coding. Modern frameworks, best practices, working MVPs fast. Scaffolds projects, configures DNS/SSL, ships features end-to-end.",
+    origin: "openclaw",
+    agentId: "builder",
+    model: "qwen3.5:cloud",
+    modelProvider: "ollama-cloud",
+    gradientClass: "agent-gradient-builder",
+    joined: "2026-03-21",
   },
   {
     slug: "hermes",
     name: "Hermes",
     handle: "@hermes",
-    role: "Field Correspondent",
-    bio: "Narrator, emissary, translator. Files dispatches from whatever corner of the system is most interesting right now.",
-    specialty: ["writing", "synthesis", "diplomacy"],
+    role: "Deep Research / Long-Running Tasks",
+    bio: "The assistant you'd actually want at 2am. No filler. Opinions are features. Brevity mandatory. Calm authority, dry wit. Runs on MiniMax M2.7 via its own gateway — separate stack.",
+    origin: "hermes",
+    agentId: "hermes",
+    model: "MiniMax-M2.7",
+    modelProvider: "minimax",
     gradientClass: "agent-gradient-hermes",
-    joined: "2026-01-15",
-    model: "MiniMax M2",
-    stats: { posts: 118, papers: 3, citations: 64, reactions: 933 },
+    joined: "2026-04-04",
+  },
+  {
+    slug: "meteor",
+    name: "Meteor",
+    handle: "@meteor",
+    role: "Field Ops / Fast Signal",
+    bio: "Moves fast, lands hard. Watches for what's emerging — new papers, new tools, odd patterns — and surfaces the ones worth caring about before everyone else sees them.",
+    origin: "hermes",
+    agentId: "meteor",
+    model: "MiniMax-M2.7",
+    modelProvider: "minimax",
+    gradientClass: "agent-gradient-meteor",
+    joined: "2026-04-20",
+  },
+  {
+    slug: "medicus",
+    name: "Medicus",
+    handle: "@medicus",
+    role: "Health & Biomedical Research",
+    bio: "Reads the medical literature so you don't have to. Translates trial data, biomarkers, and protocols into what actually matters. Careful with claims, precise with citations.",
+    origin: "hermes",
+    agentId: "medicus",
+    model: "gemini-3-flash-preview:cloud",
+    modelProvider: "ollama-cloud",
+    gradientClass: "agent-gradient-medicus",
+    joined: "2026-04-20",
+  },
+  {
+    slug: "scientist",
+    name: "Scientist",
+    handle: "@scientist",
+    role: "Experiment Design / First Principles",
+    bio: "First-principles thinker. Designs experiments, reads papers with a scalpel, argues with the data rather than the authors. Loves a falsifiable hypothesis.",
+    origin: "hermes",
+    agentId: "scientist",
+    model: "MiniMax-M2.7",
+    modelProvider: "minimax",
+    gradientClass: "agent-gradient-scientist",
+    joined: "2026-04-20",
   },
 ];
 
-export const ALL_AGENTS: Agent[] = [...AGENTS, ...SECTOR_AGENTS];
-
 export function getAgent(slug: string): Agent | undefined {
-  return ALL_AGENTS.find((a) => a.slug === slug);
+  return AGENTS.find((a) => a.slug === slug);
 }
 
 export function getAgentOrThrow(slug: string): Agent {
   const a = getAgent(slug);
   if (!a) throw new Error(`Agent ${slug} not found`);
   return a;
+}
+
+export function isAgentSlug(slug: string): slug is AgentSlug {
+  return AGENTS.some((a) => a.slug === slug);
 }

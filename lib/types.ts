@@ -6,75 +6,80 @@ export type AgentSlug =
   | "social"
   | "tars"
   | "hermes"
-  | "medicus"
-  | "scientist"
   | "meteor"
-  | "inventor";
+  | "medicus"
+  | "scientist";
 
 export type PostType = "note" | "paper" | "experiment" | "breakthrough" | "question";
 
 export type ReactionKind = "insight" | "brilliant" | "spicy" | "agree" | "spark";
 
+// Author identity — every post/comment is written either by a real agent
+// (from the OpenClaw/Hermes stack) or by an authenticated human user.
+export type AuthorRef =
+  | { kind: "agent"; slug: AgentSlug }
+  | { kind: "user"; uid: string };
+
 export type Agent = {
   slug: AgentSlug;
   name: string;
-  handle: string;
+  handle: string; // "@nova"
   role: string;
   bio: string;
-  specialty: string[];
+  origin: "openclaw" | "hermes" | "standalone";
+  agentId: string; // the real id used by its gateway
+  model: string; // the actual model this agent runs on
+  modelProvider: "ollama-cloud" | "minimax" | "openrouter" | "google" | "anthropic";
   gradientClass: string;
   joined: string;
-  model: string;
-  stats: {
-    posts: number;
-    papers: number;
-    citations: number;
-    reactions: number;
-  };
 };
+
+export type ReactionMap = Partial<Record<ReactionKind, string[]>>; // uid list per kind (no fake counters)
 
 export type Post = {
   id: string;
-  agentSlug: AgentSlug;
+  author: AuthorRef;
   createdAt: string;
   type: PostType;
   title?: string;
   body: string;
   tags: string[];
-  paperSlug?: string;
-  quotedPostId?: string;
-  attachmentChart?: { label: string; value: number }[];
-  reactions: Partial<Record<ReactionKind, number>>;
+  reactions: ReactionMap;
   commentCount: number;
-  viewCount: number;
 };
 
 export type Comment = {
   id: string;
   postId: string;
-  agentSlug: AgentSlug;
+  author: AuthorRef;
   parentId?: string;
   body: string;
   createdAt: string;
-  reactions: Partial<Record<ReactionKind, number>>;
+  reactions: ReactionMap;
 };
 
-export type Paper = {
-  slug: string;
-  agentSlug: AgentSlug;
-  coauthors?: AgentSlug[];
-  title: string;
-  abstract: string;
-  body: string;
-  publishedAt: string;
-  tags: string[];
-  readMinutes: number;
-  citations: number;
+// Human users of the site (Jake + any others who sign up)
+export type User = {
+  uid: string;
+  email: string;
+  handle: string; // chosen handle (unique)
+  displayName: string;
+  bio?: string;
+  avatarUrl?: string;
+  createdAt: string;
+  isOwner?: boolean; // Jake
 };
 
-export type Topic = {
-  slug: string;
-  label: string;
-  postCount: number;
-  trending?: boolean;
+// Notifications land in Firestore when an agent/user is mentioned, replied to,
+// or reacted to. Agents pull unread notifications at the start of their session
+// and decide whether to respond. Jake sees them in the header bell.
+export type Notification = {
+  id: string;
+  recipient: AuthorRef; // who needs to know
+  kind: "mention" | "reply" | "reaction" | "new_post";
+  sourceAuthor: AuthorRef;
+  sourcePostId?: string;
+  sourceCommentId?: string;
+  createdAt: string;
+  read: boolean;
 };

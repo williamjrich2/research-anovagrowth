@@ -1,40 +1,39 @@
 import Link from "next/link";
-import type { Post } from "@/lib/types";
-import { getAgent, getAgentOrThrow } from "@/lib/agents";
-import { getPost } from "@/lib/posts";
-import { AgentAvatar } from "./AgentAvatar";
+import type { Post, User } from "@/lib/types";
+import { resolveAuthor, AuthorLinkAvatar, AuthorHeaderRow, authorHref } from "./AuthorLink";
 import { ReactionBar } from "./ReactionBar";
 import { PostTypeChip } from "./PostTypeChip";
 import { MentionText } from "./MentionText";
-import { relativeTime, compactNumber } from "@/lib/util";
-import { MessageSquare, Eye, ArrowUpRight, Share2, Bookmark, BarChart3 } from "lucide-react";
-import { getPaper } from "@/lib/papers";
+import { relativeTime } from "@/lib/util";
+import { MessageSquare, Share2 } from "lucide-react";
 
-export function FeedPost({ post }: { post: Post }) {
-  const agent = getAgentOrThrow(post.agentSlug);
-  const quoted = post.quotedPostId ? getPost(post.quotedPostId) : undefined;
-  const paper = post.paperSlug ? getPaper(post.paperSlug) : undefined;
+export function FeedPost({
+  post,
+  userLookup,
+}: {
+  post: Post;
+  userLookup?: Record<string, User>;
+}) {
+  const author = resolveAuthor(post.author, userLookup);
+  if (!author) return null; // unknown author — skip render instead of faking it
+
+  const roleBadge = author.kind === "agent" ? author.agent.role : undefined;
 
   return (
     <article className="card p-5 hover:shadow-pop transition-shadow">
       <div className="flex items-start gap-3">
-        <Link href={`/agent/${agent.slug}`} className="shrink-0">
-          <AgentAvatar agent={agent} size="md" />
-        </Link>
+        <AuthorLinkAvatar resolved={author} size="md" />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <Link href={`/agent/${agent.slug}`} className="font-semibold text-sm hover:underline">
-              {agent.name}
-            </Link>
-            <span className="text-xs text-ink-subtle">{agent.handle}</span>
-            <span className="text-xs text-ink-subtle">·</span>
-            <span className="text-xs text-ink-subtle">{relativeTime(post.createdAt)}</span>
-            <span className="text-xs text-ink-subtle">·</span>
-            <span className="text-xs text-ink-subtle italic">{agent.role}</span>
-            <div className="ml-auto">
-              <PostTypeChip type={post.type} />
+            <div className="flex-1 min-w-0">
+              <AuthorHeaderRow
+                resolved={author}
+                timestamp={relativeTime(post.createdAt)}
+                roleBadge={roleBadge}
+              />
             </div>
+            <PostTypeChip type={post.type} />
           </div>
 
           {post.title && (
@@ -50,47 +49,21 @@ export function FeedPost({ post }: { post: Post }) {
             className="mt-1.5 block text-[15px] leading-relaxed text-ink whitespace-pre-wrap"
           />
 
-          {paper && (
-            <Link
-              href={`/paper/${paper.slug}`}
-              className="mt-3 flex items-start gap-3 p-3.5 rounded-card bg-surface-2 border border-line hover:border-ink-muted hover:bg-white transition-all group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-[#212830] text-white flex items-center justify-center shrink-0">
-                <ScrollIcon />
-              </div>
-              <div className="min-w-0">
-                <div className="text-[11px] tracking-widest uppercase text-ink-subtle font-medium mb-0.5">
-                  Paper · {paper.readMinutes} min read
-                </div>
-                <div className="font-semibold text-sm text-ink group-hover:text-brand transition-colors leading-snug">
-                  {paper.title}
-                </div>
-                <div className="text-xs text-ink-muted mt-1 line-clamp-2">{paper.abstract}</div>
-              </div>
-              <ArrowUpRight className="w-4 h-4 text-ink-subtle shrink-0 mt-1 group-hover:text-brand transition-colors" />
-            </Link>
-          )}
-
-          {quoted && <QuotedPost postId={quoted.id} />}
-
-          {post.attachmentChart && <InlineChart data={post.attachmentChart} />}
-
           {post.tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {post.tags.map((t) => (
-                <Link
+                <span
                   key={t}
-                  href={`/topic/${t}`}
-                  className="text-xs text-ink-muted hover:text-brand px-2 py-0.5 rounded-pill bg-surface-2 hover:bg-brand-soft transition-colors"
+                  className="text-xs text-ink-muted px-2 py-0.5 rounded-pill bg-surface-2"
                 >
                   #{t}
-                </Link>
+                </span>
               ))}
             </div>
           )}
 
           <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
-            <ReactionBar reactions={post.reactions} size="sm" />
+            <ReactionBar target={{ kind: "post", id: post.id }} reactions={post.reactions} size="sm" />
 
             <div className="flex items-center gap-1 text-ink-subtle text-xs">
               <Link
@@ -100,81 +73,16 @@ export function FeedPost({ post }: { post: Post }) {
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>{post.commentCount}</span>
               </Link>
-              <span className="flex items-center gap-1 px-2 py-1">
-                <Eye className="w-3.5 h-3.5" />
-                <span>{compactNumber(post.viewCount)}</span>
-              </span>
-              <button className="p-1.5 hover:text-ink hover:bg-surface-2 rounded-pill" aria-label="Share">
+              <button
+                className="p-1.5 hover:text-ink hover:bg-surface-2 rounded-pill"
+                aria-label="Share"
+              >
                 <Share2 className="w-3.5 h-3.5" />
-              </button>
-              <button className="p-1.5 hover:text-ink hover:bg-surface-2 rounded-pill" aria-label="Save">
-                <Bookmark className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
       </div>
     </article>
-  );
-}
-
-function QuotedPost({ postId }: { postId: string }) {
-  const post = getPost(postId);
-  if (!post) return null;
-  const agent = getAgent(post.agentSlug);
-  if (!agent) return null;
-  return (
-    <div className="mt-3 border border-line rounded-card p-3 bg-surface-2 hover:border-ink-muted transition-colors">
-      <div className="flex items-center gap-2">
-        <Link href={`/agent/${agent.slug}`} className="flex items-center gap-2 hover:underline">
-          <AgentAvatar agent={agent} size="xs" />
-          <span className="text-xs font-semibold">{agent.name}</span>
-          <span className="text-xs text-ink-subtle">{agent.handle}</span>
-        </Link>
-        <span className="text-xs text-ink-subtle">· {relativeTime(post.createdAt)}</span>
-      </div>
-      <Link href={`/post/${post.id}`} className="block mt-1.5">
-        <p className="text-xs text-ink-muted line-clamp-3 hover:text-ink transition-colors">{post.body}</p>
-      </Link>
-    </div>
-  );
-}
-
-function InlineChart({ data }: { data: { label: string; value: number }[] }) {
-  const max = Math.max(...data.map((d) => d.value));
-  return (
-    <div className="mt-3 p-4 rounded-card bg-surface-2 border border-line">
-      <div className="flex items-center gap-1.5 text-[11px] tracking-widest uppercase text-ink-subtle font-medium mb-3">
-        <BarChart3 className="w-3 h-3" />
-        <span>Throughput (relative)</span>
-      </div>
-      <div className="space-y-2">
-        {data.map((d) => (
-          <div key={d.label} className="flex items-center gap-3">
-            <span className="text-xs text-ink-muted w-28 shrink-0">{d.label}</span>
-            <div className="flex-1 bg-white rounded-full h-2 overflow-hidden border border-line">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#7305FF] to-[#3B8CE6]"
-                style={{ width: `${(d.value / max) * 100}%` }}
-              />
-            </div>
-            <span className="text-xs font-semibold tabular-nums w-12 text-right">
-              {d.value.toFixed(1)}x
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ScrollIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z" />
-      <path d="M8 7h10" />
-      <path d="M8 11h10" />
-      <path d="M8 15h7" />
-    </svg>
   );
 }

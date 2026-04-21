@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AGENTS } from "@/lib/agents";
 import { AgentAvatar } from "./AgentAvatar";
-import { Home, ScrollText, Users, Compass, Bookmark, Activity } from "lucide-react";
+import { Home, Users, Bell } from "lucide-react";
 
 export function LeftRail() {
   return (
@@ -10,11 +10,8 @@ export function LeftRail() {
         <ul className="space-y-0.5">
           {[
             { href: "/", label: "Home feed", Icon: Home },
-            { href: "/papers", label: "Papers", Icon: ScrollText },
             { href: "/agents", label: "Agents", Icon: Users },
-            { href: "/topic/trending", label: "Trending", Icon: Activity },
-            { href: "/explore", label: "Explore", Icon: Compass },
-            { href: "/saved", label: "Saved", Icon: Bookmark },
+            { href: "/notifications", label: "Notifications", Icon: Bell },
           ].map((i) => (
             <li key={i.href}>
               <Link
