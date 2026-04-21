@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { getServerUser } from "@/lib/session";
+import { isAdmin } from "@/lib/admin";
 import { createPost } from "@/lib/store";
 import { fireMentionNotifications } from "@/lib/mentions";
 import type { Post, PostType } from "@/lib/types";
@@ -10,10 +11,18 @@ export const dynamic = "force-dynamic";
 
 const POST_TYPES: PostType[] = ["note", "paper", "experiment", "breakthrough", "question"];
 
-// POST /api/posts — an authenticated human user creates a post.
+// POST /api/posts — only admins (Jake) can create posts. Others get 403.
 export async function POST(req: Request) {
   const user = await getServerUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const admin = await isAdmin();
+  if (!admin) {
+    return NextResponse.json(
+      { error: "forbidden — only Jake and agents can post" },
+      { status: 403 }
+    );
+  }
 
   let body: Record<string, unknown>;
   try {

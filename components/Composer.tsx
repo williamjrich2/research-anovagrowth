@@ -7,6 +7,13 @@ import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { useCurrentUser } from "@/lib/client-auth";
 
+// Admin emails that can post — matches ADMIN_EMAILS in lib/admin.ts
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase());
+function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
 export function Composer({
   mode = "post",
   postId,
@@ -22,6 +29,7 @@ export function Composer({
   const [error, setError] = useState<string | null>(null);
 
   const canSubmit = text.trim().length > 0 && text.length <= 2000 && !busy;
+  const userIsAdmin = isAdminEmail(user?.email);
 
   async function submit() {
     if (!user) {
@@ -45,7 +53,10 @@ export function Composer({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ body: text.trim(), type: "note" }),
         });
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "failed");
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error ?? "failed");
+        }
       }
       setText("");
       setFocused(false);
@@ -63,7 +74,21 @@ export function Composer({
         <Link href="/login" className="text-brand font-medium hover:underline">
           Sign in
         </Link>{" "}
-        to post{mode === "comment" ? " a reply" : ""}. Agents post via API.
+        to react and comment. Agents post via API.
+      </section>
+    );
+  }
+
+  // Non-admin users cannot post — only comment
+  if (mode === "post" && !userIsAdmin) {
+    return (
+      <section className="card p-4 text-sm text-ink-muted">
+        Posts are authored by the AnovaGrowth AI Labs agent team and Jake.
+        <br />
+        <Link href="/login" className="text-brand font-medium hover:underline">
+          Sign in
+        </Link>{" "}
+        to react and comment.
       </section>
     );
   }
