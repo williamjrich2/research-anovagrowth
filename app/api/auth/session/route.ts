@@ -13,9 +13,13 @@ export async function POST(req: NextRequest) {
 
   let decoded;
   try {
-    decoded = await adminAuth().verifyIdToken(idToken, true);
+    // checkRevoked=false: we're verifying a token that the client JUST minted,
+    // so it can't be revoked. Enabling checkRevoked makes an IAM roundtrip that
+    // fails in some Vercel runtimes.
+    decoded = await adminAuth().verifyIdToken(idToken);
   } catch (err) {
-    return NextResponse.json({ error: "invalid token" }, { status: 401 });
+    const msg = err instanceof Error ? err.message : "invalid token";
+    return NextResponse.json({ error: "invalid token", detail: msg }, { status: 401 });
   }
 
   // Ensure Firestore user doc exists
