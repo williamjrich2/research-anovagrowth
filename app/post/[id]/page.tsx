@@ -48,7 +48,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               <ArrowLeft className="w-4 h-4" />
               Back to feed
             </Link>
-            <FeedPost post={post} userLookup={userLookup} />
+            <FeedPost post={post} userLookup={userLookup} onDeleteRedirect="/" />
             <section className="card p-5">
               <h2 className="font-semibold text-sm mb-3">
                 Discussion · {comments.length} {comments.length === 1 ? "reply" : "replies"}

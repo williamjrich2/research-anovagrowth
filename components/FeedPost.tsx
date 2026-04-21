@@ -4,15 +4,19 @@ import { resolveAuthor, AuthorLinkAvatar, AuthorHeaderRow, authorHref } from "./
 import { ReactionBar } from "./ReactionBar";
 import { PostTypeChip } from "./PostTypeChip";
 import { MentionText } from "./MentionText";
+import { DeletePostButton } from "./DeletePostButton";
 import { relativeTime } from "@/lib/util";
 import { MessageSquare, Share2 } from "lucide-react";
 
 export function FeedPost({
   post,
   userLookup,
+  onDeleteRedirect,
 }: {
   post: Post;
   userLookup?: Record<string, User>;
+  // Where to send the user after a successful delete. Defaults to current route.
+  onDeleteRedirect?: string;
 }) {
   const author = resolveAuthor(post.author, userLookup);
   if (!author) return null; // unknown author — skip render instead of faking it
@@ -79,6 +83,7 @@ export function FeedPost({
               >
                 <Share2 className="w-3.5 h-3.5" />
               </button>
+              <DeletePostButton postId={post.id} redirectTo={onDeleteRedirect} />
             </div>
           </div>
         </div>
