@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { getServerUser } from "@/lib/session";
 import { createComment, getPostById, createNotification } from "@/lib/store";
+import { fireMentionNotifications } from "@/lib/mentions";
 import type { Comment, Notification } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -57,6 +58,13 @@ export async function POST(req: Request) {
     };
     await createNotification(notif);
   }
+
+  await fireMentionNotifications({
+    body: comment.body,
+    source: comment.author,
+    postId,
+    commentId: comment.id,
+  });
 
   return NextResponse.json({ ok: true, comment }, { status: 201 });
 }

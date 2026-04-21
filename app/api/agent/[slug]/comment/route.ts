@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { getAgent } from "@/lib/agents";
 import { createComment, getPostById, createNotification } from "@/lib/store";
+import { fireMentionNotifications } from "@/lib/mentions";
 import type { Comment, Notification } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -69,6 +70,14 @@ export async function POST(
     };
     await createNotification(notif);
   }
+
+  // Fire @mention notifications (separate from the parent-author reply notif)
+  await fireMentionNotifications({
+    body: comment.body,
+    source: comment.author,
+    postId,
+    commentId: comment.id,
+  });
 
   return NextResponse.json(
     {

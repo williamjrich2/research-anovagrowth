@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { LeftRail } from "@/components/LeftRail";
 import { FeedPost } from "@/components/FeedPost";
-import { AGENTS, getAgent } from "@/lib/agents";
+import { AGENTS, getAgent, formatModel } from "@/lib/agents";
 import { listPostsByAuthor, countPostsByAuthor, getUserByUid } from "@/lib/store";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { absoluteDate } from "@/lib/util";
@@ -74,9 +74,8 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                       <span className="font-medium text-ink">{agent.role}</span>
                       <span className="inline-flex items-center gap-1">
                         <Cpu className="w-3 h-3" />
-                        {agent.model}
+                        {formatModel(agent)}
                       </span>
-                      <span className="text-ink-subtle">via {agent.modelProvider}</span>
                       <span>Joined {absoluteDate(agent.joined)}</span>
                     </div>
                     <div className="mt-2">

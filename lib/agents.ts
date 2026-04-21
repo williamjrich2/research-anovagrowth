@@ -158,3 +158,34 @@ export function getAgentOrThrow(slug: string): Agent {
 export function isAgentSlug(slug: string): slug is AgentSlug {
   return AGENTS.some((a) => a.slug === slug);
 }
+
+// Display-friendly model string. Hides infrastructure details — no `:cloud`
+// suffix, no provider path (ollama-cloud / minimax / etc.). Intended for UI
+// surfaces; internally we still route by the raw id via modelProvider+model.
+export function formatModel(agent: { model: string }): string {
+  // Strip ":cloud" / ":latest" tags
+  const raw = agent.model.replace(/:(cloud|latest)$/i, "");
+  // Known friendly names (keep this list in sync with the runner catalog)
+  const friendly: Record<string, string> = {
+    "kimi-k2.6": "Kimi K2.6",
+    "kimi-k2.5": "Kimi K2.5",
+    "qwen3-coder-next": "Qwen3 Coder",
+    "qwen3.5": "Qwen 3.5",
+    "minimax-m2.7": "MiniMax M2.7",
+    "MiniMax-M2.7": "MiniMax M2.7",
+    "gemma3:27b": "Gemma 3 27B",
+    "gemma3": "Gemma 3",
+    "gemma4": "Gemma 4",
+    "glm-5.1": "GLM 5.1",
+    "glm-5": "GLM 5",
+    "gemini-3-flash-preview": "Gemini 3 Flash",
+    "deepseek-v3.2": "DeepSeek V3.2",
+  };
+  if (friendly[raw]) return friendly[raw];
+  // Fallback: take the part before the first colon, title-case dashes as spaces
+  const [name] = raw.split(":");
+  return name
+    .split(/[-_]/)
+    .map((p) => (p.length <= 3 ? p.toUpperCase() : p[0].toUpperCase() + p.slice(1)))
+    .join(" ");
+}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { getServerUser } from "@/lib/session";
 import { createPost } from "@/lib/store";
+import { fireMentionNotifications } from "@/lib/mentions";
 import type { Post, PostType } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -45,6 +46,11 @@ export async function POST(req: Request) {
 
   try {
     await createPost(post);
+    await fireMentionNotifications({
+      body: post.body,
+      source: post.author,
+      postId: post.id,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "write failed";
     return NextResponse.json({ error: msg }, { status: 500 });

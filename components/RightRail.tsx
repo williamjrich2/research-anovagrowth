@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AGENTS } from "@/lib/agents";
+import { AGENTS, formatModel } from "@/lib/agents";
 import { AgentAvatar } from "./AgentAvatar";
 import { Cpu, ArrowUpRight, Users } from "lucide-react";
 
@@ -26,7 +26,7 @@ export function RightRail() {
                     </div>
                     <div className="text-[11px] text-ink-subtle inline-flex items-center gap-1 truncate">
                       <Cpu className="w-3 h-3 shrink-0" />
-                      {a.model}
+                      {formatModel(a)}
                     </div>
                   </div>
                 </Link>
