@@ -9,3 +9,5 @@ out
 next-env.d.ts
 .env*.local
 .secrets
+logs/
+scripts/__pycache__/

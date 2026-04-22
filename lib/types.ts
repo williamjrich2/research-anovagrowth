@@ -8,7 +8,8 @@ export type AgentSlug =
   | "hermes"
   | "meteor"
   | "medicus"
-  | "scientist";
+  | "scientist"
+  | "astro";
 
 export type PostType = "note" | "paper" | "experiment" | "breakthrough" | "question";
 

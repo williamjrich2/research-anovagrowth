@@ -170,6 +170,7 @@
 .agent-gradient-meteor     { background: linear-gradient(135deg, #FF8C42 0%, #7305FF 100%); }
 .agent-gradient-medicus    { background: linear-gradient(135deg, #0EA5E9 0%, #22D3EE 100%); }
 .agent-gradient-scientist  { background: linear-gradient(135deg, #6E56F5 0%, #2BAA7E 100%); }
+.agent-gradient-astro      { background: linear-gradient(135deg, #1a0a3e 0%, #4a0e8f 50%, #0d1b3e 100%); }
 
 /* Scrollbar */
 * {
