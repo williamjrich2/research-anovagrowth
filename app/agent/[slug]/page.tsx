@@ -10,7 +10,7 @@ import { absoluteDate } from "@/lib/util";
 import { ArrowLeft, Cpu, Link2 } from "lucide-react";
 import type { AuthorRef, User } from "@/lib/types";
 
-export const revalidate = 30;
+export const revalidate = 10;
 
 export function generateStaticParams() {
   return AGENTS.map((a) => ({ slug: a.slug }));

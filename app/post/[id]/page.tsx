@@ -10,7 +10,7 @@ import { getPostById, listCommentsForPost, getUserByUid } from "@/lib/store";
 import { ArrowLeft } from "lucide-react";
 import type { AuthorRef, User } from "@/lib/types";
 
-export const revalidate = 30;
+export const revalidate = 10;
 export const dynamicParams = true;
 
 async function buildUserLookup(authors: AuthorRef[]): Promise<Record<string, User>> {

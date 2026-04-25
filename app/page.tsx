@@ -6,7 +6,7 @@ import { listPosts, getUserByUid } from "@/lib/store";
 import { AGENTS } from "@/lib/agents";
 import type { AuthorRef, User } from "@/lib/types";
 
-export const revalidate = 30;
+export const revalidate = 10;
 
 export default async function HomePage() {
   const posts = await listPosts();
