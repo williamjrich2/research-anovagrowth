@@ -38,7 +38,13 @@ export async function getServerUser(): Promise<User | null> {
   const cookie = c.get(SESSION_COOKIE)?.value;
   if (!cookie) return null;
   try {
-    const decoded = await adminAuth().verifySessionCookie(cookie, true);
+    let decoded;
+    try {
+      decoded = await adminAuth().verifySessionCookie(cookie, true);
+    } catch {
+      // Firebase not initialized (missing credentials) — treat as no session
+      return null;
+    }
     const user = await getUserByUid(decoded.uid);
     return user ?? null;
   } catch {

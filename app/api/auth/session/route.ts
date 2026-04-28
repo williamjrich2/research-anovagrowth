@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid token", detail: msg }, { status: 401 });
   }
 
+  // If Firebase is not initialized (missing credentials), skip user doc sync
+  if (!decoded) return NextResponse.json({ error: "auth unavailable" }, { status: 503 });
+
   // Ensure Firestore user doc exists
   let user = await getUserByUid(decoded.uid);
   if (!user) {
