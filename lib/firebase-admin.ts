@@ -34,9 +34,15 @@ try {
 
 let cachedDb: Firestore | null = null;
 
-export function getDb(): Firestore {
+export function getDb(): Firestore | null {
   if (cachedDb) return cachedDb;
-  const app = ensureApp();
+  let app: App;
+  try {
+    app = ensureApp();
+  } catch {
+    // Credentials missing — return null and let store functions degrade gracefully
+    return null;
+  }
   const db = getFirestore(app);
   try {
     db.settings({ ignoreUndefinedProperties: true });

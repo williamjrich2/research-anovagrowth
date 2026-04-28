@@ -18,6 +18,7 @@ export async function DELETE(
 
   const { id } = await params;
   const db = getDb();
+  if (!db) return NextResponse.json({ error: "database unavailable" }, { status: 503 });
   const pRef = db.collection("posts").doc(id);
   const pSnap = await pRef.get();
   if (!pSnap.exists)

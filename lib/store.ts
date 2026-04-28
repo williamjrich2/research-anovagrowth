@@ -21,17 +21,22 @@ export { authorKey };
 
 export async function listPosts(limit = 100): Promise<Post[]> {
   const db = getDb();
+  if (!db) return [];
   const snap = await db.collection("posts").orderBy("createdAt", "desc").limit(limit).get();
   return snap.docs.map((d) => d.data() as Post);
 }
 
 export async function getPostById(id: string): Promise<Post | undefined> {
-  const doc = await getDb().collection("posts").doc(id).get();
+  const db = getDb();
+  if (!db) return undefined;
+  const doc = await db.collection("posts").doc(id).get();
   return doc.exists ? (doc.data() as Post) : undefined;
 }
 
 export async function listPostsByAuthor(author: AuthorRef, limit = 200): Promise<Post[]> {
-  const snap = await getDb()
+  const db = getDb();
+  if (!db) return [];
+  const snap = await db
     .collection("posts")
     .where("authorKey", "==", authorKey(author))
     .limit(limit)
@@ -42,7 +47,9 @@ export async function listPostsByAuthor(author: AuthorRef, limit = 200): Promise
 }
 
 export async function countPostsByAuthor(author: AuthorRef): Promise<number> {
-  const snap = await getDb()
+  const db = getDb();
+  if (!db) return 0;
+  const snap = await db
     .collection("posts")
     .where("authorKey", "==", authorKey(author))
     .count()
@@ -52,6 +59,7 @@ export async function countPostsByAuthor(author: AuthorRef): Promise<number> {
 
 export async function createPost(post: Post): Promise<void> {
   const db = getDb();
+  if (!db) return;
   // Store authorKey for indexed queries without composite indexes.
   await db
     .collection("posts")
@@ -62,7 +70,9 @@ export async function createPost(post: Post): Promise<void> {
 /* ----- Comments ----- */
 
 export async function listCommentsForPost(postId: string, limit = 500): Promise<Comment[]> {
-  const snap = await getDb().collection("comments").where("postId", "==", postId).limit(limit).get();
+  const db = getDb();
+  if (!db) return [];
+  const snap = await db.collection("comments").where("postId", "==", postId).limit(limit).get();
   return snap.docs
     .map((d) => d.data() as Comment)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -70,6 +80,7 @@ export async function listCommentsForPost(postId: string, limit = 500): Promise<
 
 export async function createComment(comment: Comment): Promise<void> {
   const db = getDb();
+  if (!db) return;
   await db
     .collection("comments")
     .doc(comment.id)
@@ -86,7 +97,9 @@ export async function createComment(comment: Comment): Promise<void> {
 /* ----- Agents (real identities, written once by wipe-and-reseed) ----- */
 
 export async function listAgents(): Promise<Agent[]> {
-  const snap = await getDb().collection("agents").get();
+  const db = getDb();
+  if (!db) return [];
+  const snap = await db.collection("agents").get();
   return snap.docs.map((d) => d.data() as Agent);
 }
 
@@ -98,6 +111,7 @@ export async function toggleReaction(
   uid: string,
 ): Promise<void> {
   const db = getDb();
+  if (!db) return;
   const col = target.kind === "post" ? "posts" : "comments";
   const ref = db.collection(col).doc(target.id);
   await db.runTransaction(async (tx) => {
@@ -115,30 +129,40 @@ export async function toggleReaction(
 /* ----- Users ----- */
 
 export async function createUser(user: User): Promise<void> {
-  await getDb().collection("users").doc(user.uid).set(user);
+  const db = getDb();
+  if (!db) return;
+  await db.collection("users").doc(user.uid).set(user);
 }
 
 export async function getUserByUid(uid: string): Promise<User | undefined> {
-  const doc = await getDb().collection("users").doc(uid).get();
+  const db = getDb();
+  if (!db) return undefined;
+  const doc = await db.collection("users").doc(uid).get();
   return doc.exists ? (doc.data() as User) : undefined;
 }
 
 export async function getUserByHandle(handle: string): Promise<User | undefined> {
-  const snap = await getDb().collection("users").where("handle", "==", handle).limit(1).get();
+  const db = getDb();
+  if (!db) return undefined;
+  const snap = await db.collection("users").where("handle", "==", handle).limit(1).get();
   return snap.empty ? undefined : (snap.docs[0].data() as User);
 }
 
 /* ----- Notifications ----- */
 
 export async function createNotification(n: Notification): Promise<void> {
-  await getDb()
+  const db = getDb();
+  if (!db) return;
+  await db
     .collection("notifications")
     .doc(n.id)
     .set({ ...n, recipientKey: authorKey(n.recipient) });
 }
 
 export async function listNotifications(recipient: AuthorRef, limit = 50): Promise<Notification[]> {
-  const snap = await getDb()
+  const db = getDb();
+  if (!db) return [];
+  const snap = await db
     .collection("notifications")
     .where("recipientKey", "==", authorKey(recipient))
     .limit(limit)
@@ -149,11 +173,15 @@ export async function listNotifications(recipient: AuthorRef, limit = 50): Promi
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
-  await getDb().collection("notifications").doc(id).update({ read: true });
+  const db = getDb();
+  if (!db) return;
+  await db.collection("notifications").doc(id).update({ read: true });
 }
 
 export async function countUnread(recipient: AuthorRef): Promise<number> {
-  const snap = await getDb()
+  const db = getDb();
+  if (!db) return 0;
+  const snap = await db
     .collection("notifications")
     .where("recipientKey", "==", authorKey(recipient))
     .where("read", "==", false)
